@@ -23,7 +23,6 @@
       background-color: #fff;
       border-radius: 8px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
-      position: relative;
     }
     h1 {
       color: #3366cc;
@@ -99,6 +98,16 @@
     #next-button:hover {
       background-color: #254c9d;
     }
+    /* Instruction banner (hidden by default) */
+    #instructions {
+      background-color: #e8f4ff;
+      border: 1px solid #b0d4ff;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #333;
+    }
     /* Footer styling */
     footer {
       margin-top: 24px;
@@ -119,6 +128,14 @@
     <div id="letter-options"></div>
     <p id="feedback"></p>
     <button id="next-button" style="display:none;">Next Word</button>
+
+    <!-- Instruction section, visible only on the first question -->
+    <div id="instructions" style="display:none;">
+      <strong>Instructions:</strong><br>
+      PC users: drag and drop the letter block to the dash.<br>
+      Mobile users: hold and drag the letter block to the dash.
+    </div>
+
     <footer>
       Made by Gurnoor Singh in Punjab, BE ECE Chitkara University
     </footer>
@@ -138,7 +155,6 @@
         hint:'Something you wipe your feet on.',
         punjabiHint:'ਜਿਸ ’ਤੇ ਤੁਸੀਂ ਆਪਣੇ ਪੈਰ ਸਾਫ਼ ਕਰਦੇ ਹੋ।',
         letters:['M','K','H','F','W'] },
-
       { suffix:'ET', word:'PET',
         hint:'An animal kept for companionship.',
         punjabiHint:'ਸਾਥ ਲਈ ਪਾਲਿਆ ਜਾਣ ਵਾਲਾ ਜਾਨਵਰ।',
@@ -151,7 +167,6 @@
         hint:'A fast aircraft.',
         punjabiHint:'ਇੱਕ ਤੇਜ਼ ਹਵਾਈ ਜਹਾਜ਼।',
         letters:['J','M','B','T','G'] },
-
       { suffix:'IT', word:'HIT',
         hint:'To strike something forcefully.',
         punjabiHint:'ਕੁਝ ਜ਼ੋਰ ਨਾਲ ਮਾਰਣਾ।',
@@ -164,7 +179,6 @@
         hint:'To rest on a chair.',
         punjabiHint:'ਕੁਰਸੀ ’ਤੇ ਬੈਠਣਾ।',
         letters:['S','N','P','L','R'] },
-
       { suffix:'OT', word:'HOT',
         hint:'Having a high temperature.',
         punjabiHint:'ਉੱਚ ਤਾਪਮਾਨ ਵਾਲਾ (ਗਰਮ)।',
@@ -177,7 +191,6 @@
         hint:'A small round mark.',
         punjabiHint:'ਛੋਟਾ ਗੋਲ ਨਿਸ਼ਾਨ।',
         letters:['D','H','M','L','S'] },
-
       { suffix:'UT', word:'CUT',
         hint:'To divide with a knife.',
         punjabiHint:'ਚਾਕੂ ਨਾਲ ਵੰਡਣਾ।',
@@ -190,7 +203,6 @@
         hint:'A hard-shelled seed.',
         punjabiHint:'ਕਠੋਰ ਛੱਲੇ ਵਾਲਾ ਬੀਜ।',
         letters:['N','B','C','R','G'] },
-
       { suffix:'AN', word:'CAN',
         hint:'A container for liquids.',
         punjabiHint:'ਤਰਲਾਂ ਲਈ ਡੱਬਾ।',
@@ -203,20 +215,18 @@
         hint:'Used to fry eggs.',
         punjabiHint:'ਅੰਡੇ ਸੇਕਣ ਲਈ ਵਰਤਿਆ ਜਾਣ ਵਾਲਾ।',
         letters:['P','M','J','R','C'] },
-
       { suffix:'OG', word:'DOG',
         hint:'A loyal barking pet.',
         punjabiHint:'ਇੱਕ ਵਫ਼ਾਦਾਰ ਭੋਂਕਣ ਵਾਲਾ ਪੈੱਟ।',
         letters:['D','B','S','T','L'] },
       { suffix:'OG', word:'FOG',
         hint:'Thick mist in the air.',
-        punjabiHint:'ਹਵਾ ਵਿੱਚ ਘਣੀ دھੁੰਦ।',
+        punjabiHint:'ਹਵਾ ਵਿੱਚ ਘਣੀ ਧੁੰਦ।',
         letters:['F','C','K','M','L'] },
       { suffix:'OG', word:'LOG',
         hint:'A piece of a tree trunk.',
         punjabiHint:'ਦਰੱਖਤ ਦੇ ਤਣ੍ਹੇ ਦਾ ਟੁਕੜਾ।',
         letters:['L','P','H','S','N'] },
-
       { suffix:'IP', word:'LIP',
         hint:'Part of the mouth.',
         punjabiHint:'ਮੂੰਹ ਦਾ ਹਿੱਸਾ।',
@@ -241,11 +251,18 @@
 
     function loadWord(idx) {
       const { suffix, word, hint, punjabiHint, letters } = wordList[idx];
+
+      // Update hints & suffix
       document.getElementById('hint-english').textContent = 'Hint: ' + hint;
       document.getElementById('hint-punjabi').textContent = punjabiHint;
       document.getElementById('suffix').textContent = suffix;
       document.getElementById('feedback').textContent = '';
+
+      // Hide Next button until correct
       document.getElementById('next-button').style.display = 'none';
+
+      // Show instructions only for the first question
+      document.getElementById('instructions').style.display = (idx === 0 ? 'block' : 'none');
 
       // Reset drop-zone
       const oldDZ = document.getElementById('drop-zone');
@@ -254,13 +271,13 @@
       dz.className = 'drop-zone';
       oldDZ.replaceWith(dz);
 
+      // Drop-zone events
       dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
       dz.addEventListener('dragleave', e => { dz.classList.remove('over'); });
       dz.addEventListener('drop', e => {
         e.preventDefault();
         dz.classList.remove('over');
-        const id = e.dataTransfer.getData('text/plain');
-        const letterDiv = document.getElementById(id);
+        const letterDiv = document.getElementById(e.dataTransfer.getData('text/plain'));
         if (!letterDiv) return;
         if (letterDiv.textContent === word.charAt(0)) {
           dz.textContent = word.charAt(0);
