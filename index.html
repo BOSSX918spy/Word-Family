@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Responsive viewport for mobile devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Word Family Drag-and-Drop Practice</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    /* Fluid container with max width */
+    .container {
+      width: 90%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 16px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    h1 {
+      color: #3366cc;
+      margin-bottom: 12px;
+      font-size: 1.8em;
+    }
+    #hint-english {
+      font-size: 1.1em;
+      margin-bottom: 4px;
+    }
+    #hint-punjabi {
+      font-size: 1em;
+      margin-bottom: 16px;
+      color: #555;
+      font-style: italic;
+    }
+    #word-display {
+      font-size: 2em;
+      margin: 20px 0;
+    }
+    /* Larger drop-zone for easy tapping */
+    .drop-zone {
+      display: inline-block;
+      min-width: 2.5em;
+      height: 1.6em;
+      line-height: 1.6em;
+      border-bottom: 3px solid #000;
+      margin-right: 0.4em;
+      vertical-align: bottom;
+      transition: background-color 0.2s;
+    }
+    .drop-zone.over {
+      background-color: #e0f7fa;
+    }
+    /* Flex layout for letter options */
+    #letter-options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .letter {
+      flex: 0 0 auto;
+      min-width: 3em;
+      padding: 12px 14px;
+      margin: 6px;
+      background-color: #ffeb3b;
+      border: 2px solid #666;
+      border-radius: 5px;
+      cursor: grab;
+      font-size: 1.4em;
+      user-select: none;
+      text-align: center;
+    }
+    .letter:active {
+      cursor: grabbing;
+    }
+    #feedback {
+      font-size: 1.2em;
+      height: 1.5em;
+      margin: 12px 0;
+    }
+    #next-button {
+      padding: 10px 20px;
+      font-size: 1em;
+      margin-top: 10px;
+      background-color: #3366cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #next-button:hover {
+      background-color: #254c9d;
+    }
+    /* Footer styling */
+    footer {
+      margin-top: 24px;
+      font-size: 0.9em;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Word Family Practice</h1>
+    <p id="hint-english">Hint: …</p>
+    <p id="hint-punjabi">ਸੂਚਨਾ: …</p>
+    <div id="word-display">
+      <div id="drop-zone" class="drop-zone"></div>
+      <span id="suffix"></span>
+    </div>
+    <div id="letter-options"></div>
+    <p id="feedback"></p>
+    <button id="next-button" style="display:none;">Next Word</button>
+    <footer>
+      Made by Gurnoor Singh in Punjab, BE ECE Chitkara University
+    </footer>
+  </div>
+
+  <script>
+    const words = [
+      { suffix:'AT', word:'CAT',
+        hint:'A small domestic animal that purrs.',
+        punjabiHint:'ਇੱਕ ਛੋਟਾ ਘਰੇਲੂ ਜਾਨਵਰ ਜੋ ਗੁਰਗੁੁਰਾਉਂਦਾ ਹੈ।',
+        letters:['C','B','H','M','R'] },
+      { suffix:'AT', word:'BAT',
+        hint:'A flying nocturnal animal.',
+        punjabiHint:'ਉੱਡਣ ਵਾਲਾ ਰਾਤਿ ਦਾ ਜਾਨਵਰ।',
+        letters:['B','S','C','P','R'] },
+      { suffix:'AT', word:'MAT',
+        hint:'Something you wipe your feet on.',
+        punjabiHint:'ਜਿਸ ’ਤੇ ਤੁਸੀਂ ਆਪਣੇ ਪੈਰ ਸਾਫ਼ ਕਰਦੇ ਹੋ।',
+        letters:['M','K','H','F','W'] },
+
+      { suffix:'ET', word:'PET',
+        hint:'An animal kept for companionship.',
+        punjabiHint:'ਸਾਥ ਲਈ ਪਾਲਿਆ ਜਾਣ ਵਾਲਾ ਜਾਨਵਰ।',
+        letters:['P','J','L','G','S'] },
+      { suffix:'ET', word:'NET',
+        hint:'Used to catch fish.',
+        punjabiHint:'ਮੱਛੀਆਂ ਫੜਨ ਲਈ ਵਰਤਿਆ ਜਾਣ ਵਾਲਾ।',
+        letters:['N','S','C','L','F'] },
+      { suffix:'ET', word:'JET',
+        hint:'A fast aircraft.',
+        punjabiHint:'ਇੱਕ ਤੇਜ਼ ਹਵਾਈ ਜਹਾਜ਼।',
+        letters:['J','M','B','T','G'] },
+
+      { suffix:'IT', word:'HIT',
+        hint:'To strike something forcefully.',
+        punjabiHint:'ਕੁਝ ਜ਼ੋਰ ਨਾਲ ਮਾਰਣਾ।',
+        letters:['H','B','M','L','R'] },
+      { suffix:'IT', word:'FIT',
+        hint:'In good physical condition.',
+        punjabiHint:'ਚੰਗੀ ਸਰੀਰਕ ਹਾਲਤ ਵਿੱਚ।',
+        letters:['F','K','S','L','M'] },
+      { suffix:'IT', word:'SIT',
+        hint:'To rest on a chair.',
+        punjabiHint:'ਕੁਰਸੀ ’ਤੇ ਬੈਠਣਾ।',
+        letters:['S','N','P','L','R'] },
+
+      { suffix:'OT', word:'HOT',
+        hint:'Having a high temperature.',
+        punjabiHint:'ਉੱਚ ਤਾਪਮਾਨ ਵਾਲਾ (ਗਰਮ)।',
+        letters:['H','P','L','D','N'] },
+      { suffix:'OT', word:'POT',
+        hint:'Used to cook food in.',
+        punjabiHint:'ਭੋਜਨ ਪਕਾਉਣ ਲਈ ਵਰਤਿਆ ਜਾਣ ਵਾਲਾ ਬਰਤਨ।',
+        letters:['P','B','R','C','F'] },
+      { suffix:'OT', word:'DOT',
+        hint:'A small round mark.',
+        punjabiHint:'ਛੋਟਾ ਗੋਲ ਨਿਸ਼ਾਨ।',
+        letters:['D','H','M','L','S'] },
+
+      { suffix:'UT', word:'CUT',
+        hint:'To divide with a knife.',
+        punjabiHint:'ਚਾਕੂ ਨਾਲ ਵੰਡਣਾ।',
+        letters:['C','B','H','M','R'] },
+      { suffix:'UT', word:'HUT',
+        hint:'A small simple shelter.',
+        punjabiHint:'ਇੱਕ ਛੋਟੀ ਸਰਲ ਠਹਿਰੰਨੀ।',
+        letters:['H','G','J','L','T'] },
+      { suffix:'UT', word:'NUT',
+        hint:'A hard-shelled seed.',
+        punjabiHint:'ਕਠੋਰ ਛੱਲੇ ਵਾਲਾ ਬੀਜ।',
+        letters:['N','B','C','R','G'] },
+
+      { suffix:'AN', word:'CAN',
+        hint:'A container for liquids.',
+        punjabiHint:'ਤਰਲਾਂ ਲਈ ਡੱਬਾ।',
+        letters:['C','B','D','S','L'] },
+      { suffix:'AN', word:'FAN',
+        hint:'Used to cool air.',
+        punjabiHint:'ਹਵਾ ਨੂੰ ਠੰਢਾ ਕਰਨ ਲਈ ਵਰਤੀ ਜਾਂਦੀ ਮਸ਼ੀਨ।',
+        letters:['F','K','H','T','W'] },
+      { suffix:'AN', word:'PAN',
+        hint:'Used to fry eggs.',
+        punjabiHint:'ਅੰਡੇ ਸੇਕਣ ਲਈ ਵਰਤਿਆ ਜਾਣ ਵਾਲਾ।',
+        letters:['P','M','J','R','C'] },
+
+      { suffix:'OG', word:'DOG',
+        hint:'A loyal barking pet.',
+        punjabiHint:'ਇੱਕ ਵਫ਼ਾਦਾਰ ਭੋਂਕਣ ਵਾਲਾ ਪੈੱਟ।',
+        letters:['D','B','S','T','L'] },
+      { suffix:'OG', word:'FOG',
+        hint:'Thick mist in the air.',
+        punjabiHint:'ਹਵਾ ਵਿੱਚ ਘਣੀ دھੁੰਦ।',
+        letters:['F','C','K','M','L'] },
+      { suffix:'OG', word:'LOG',
+        hint:'A piece of a tree trunk.',
+        punjabiHint:'ਦਰੱਖਤ ਦੇ ਤਣ੍ਹੇ ਦਾ ਟੁਕੜਾ।',
+        letters:['L','P','H','S','N'] },
+
+      { suffix:'IP', word:'LIP',
+        hint:'Part of the mouth.',
+        punjabiHint:'ਮੂੰਹ ਦਾ ਹਿੱਸਾ।',
+        letters:['L','T','M','P','R'] },
+      { suffix:'IP', word:'SIP',
+        hint:'To drink in small amounts.',
+        punjabiHint:'ਛੋਟੇ-ਛੋਟੇ ਘੂੰਟ ਵਿੱਚ ਪੀਣਾ।',
+        letters:['S','H','G','B','C'] }
+    ];
+
+    function shuffleArray(a) {
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // Shuffle once and start at first index
+    let wordList = shuffleArray([...words]);
+    let currentIndex = 0;
+
+    function loadWord(idx) {
+      const { suffix, word, hint, punjabiHint, letters } = wordList[idx];
+      document.getElementById('hint-english').textContent = 'Hint: ' + hint;
+      document.getElementById('hint-punjabi').textContent = punjabiHint;
+      document.getElementById('suffix').textContent = suffix;
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('next-button').style.display = 'none';
+
+      // Reset drop-zone
+      const oldDZ = document.getElementById('drop-zone');
+      const dz = document.createElement('div');
+      dz.id = 'drop-zone';
+      dz.className = 'drop-zone';
+      oldDZ.replaceWith(dz);
+
+      dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+      dz.addEventListener('dragleave', e => { dz.classList.remove('over'); });
+      dz.addEventListener('drop', e => {
+        e.preventDefault();
+        dz.classList.remove('over');
+        const id = e.dataTransfer.getData('text/plain');
+        const letterDiv = document.getElementById(id);
+        if (!letterDiv) return;
+        if (letterDiv.textContent === word.charAt(0)) {
+          dz.textContent = word.charAt(0);
+          document.getElementById('feedback').textContent = 'Correct!';
+          letterDiv.remove();
+          if (currentIndex < wordList.length - 1) {
+            document.getElementById('next-button').style.display = 'inline-block';
+          }
+        } else {
+          document.getElementById('feedback').textContent = 'Try again!';
+        }
+      });
+
+      // Populate letter options
+      const opts = document.getElementById('letter-options');
+      opts.innerHTML = '';
+      shuffleArray([...letters]).forEach(ltr => {
+        const d = document.createElement('div');
+        d.textContent = ltr;
+        d.id = `letter-${ltr}-${idx}`;
+        d.className = 'letter';
+        d.draggable = true;
+        d.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', d.id);
+        });
+        opts.appendChild(d);
+      });
+    }
+
+    // Next button handler
+    document.getElementById('next-button').onclick = () => {
+      currentIndex++;
+      if (currentIndex >= wordList.length) {
+        wordList = shuffleArray([...words]);
+        currentIndex = 0;
+      }
+      loadWord(currentIndex);
+    };
+
+    // Initialize
+    loadWord(currentIndex);
+  </script>
+</body>
+</html>
